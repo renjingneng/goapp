@@ -5,36 +5,19 @@
 package core
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 var contlContainer map[string]interface{}
 var router *gin.Engine
 
-type Context struct {
-	src *gin.Context
-}
-
-func (context *Context) Query(key string) string {
-	return context.src.Query(key)
-}
-
-func (context *Context) DefaultQuery(key, defaultValue string) string {
-	return context.src.DefaultQuery(key, defaultValue)
-}
-
-func (context *Context) PostForm(key string) string {
-	return context.src.PostForm(key)
-}
-func (context *Context) DefaultPostForm(key, defaultValue string) string {
-	return context.src.DefaultPostForm(key, defaultValue)
-}
 func init() {
 	contlContainer = make(map[string]interface{})
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 	router = gin.New()
 }
 
@@ -46,7 +29,16 @@ func RegisterController(contlPtr interface{}) {
 	pkgName := pkgPathList[(len(pkgPathList) - 1)]
 	contlShortName := contlType.Name()[:len(contlType.Name())-10]
 	contlShortName = strings.ToLower(contlShortName)
-	contlContainer[pkgName+"_"+contlShortName] = contlPtr
+	//判断容器里面是否已经有了
+	if _, ok := contlContainer[pkgName+"_"+contlShortName]; !ok {
+		contlContainer[pkgName+"_"+contlShortName] = contlPtr
+		//调用控制器初始化方法
+		method := contlPtrVal.MethodByName("Init")
+		if !method.IsValid() {
+			panic("contl init error")
+		}
+		method.Call([]reflect.Value{})
+	}
 }
 
 func Start(addr string) {

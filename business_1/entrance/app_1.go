@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/renjingneng/goapp/business_1/controller/api"
-	"github.com/renjingneng/goapp/business_1/database/mysql"
-	"github.com/renjingneng/goapp/business_1/database/redis"
 	"github.com/renjingneng/goapp/core"
 	"github.com/renjingneng/goapp/core/config"
 )
@@ -17,11 +15,7 @@ func main() {
 	//读取配置
 	config.LoadConfig()
 	//绑定控制器
-	core.RegisterController(&api.IndexController{
-		Tablename:    "account",
-		OpenDatabase: mysql.NewOpen(),
-		OpenRedis:    redis.NewOpen(),
-	})
+	core.RegisterController(&api.IndexController{})
 	//开始
 	core.Start("0.0.0.0:" + config.Get("Port"))
 }
