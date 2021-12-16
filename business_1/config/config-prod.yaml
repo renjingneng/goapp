@@ -1,0 +1,8 @@
+#基本信息
+Port: 8080
+#mysql配置
+MysqlOpenW: root:root@tcp(localhost:3306)/test
+MysqlOpenR: root:root@tcp(localhost:3306)/test
+#redis配置
+RedisOpenSingle: localhost:6379
+RedisOpenCluster: localhost:6379,localhost:6379,localhost:6379,localhost:6379,localhost:6379,localhost:6379
