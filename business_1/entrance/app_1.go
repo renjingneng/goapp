@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/renjingneng/goapp/business_1/controller/admin"
 	"github.com/renjingneng/goapp/business_1/controller/api"
 	"github.com/renjingneng/goapp/core"
 	"github.com/renjingneng/goapp/core/config"
@@ -16,6 +17,7 @@ func main() {
 	config.LoadConfig()
 	//绑定控制器
 	core.RegisterController(&api.IndexController{})
+	core.RegisterController(&admin.IndexController{})
 	//开始
 	core.Start("0.0.0.0:" + config.Get("Port"))
 }

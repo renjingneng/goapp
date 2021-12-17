@@ -17,15 +17,17 @@ func (ctl *IndexController) Init() {
 }
 
 // Test1Action 测试服务
-func (ctl *IndexController) Test1Action(context *core.Context) map[string]interface{} {
+func (ctl *IndexController) Test1Action(context *core.Context) *core.Context {
 	temp := ctl.account.GetInfoById(context.Query("id"))
-	return temp
+	context.Json(temp)
+	return context
 }
 
 // Test2Action spew.Dump深度打印值
-func (ctl *IndexController) Test2Action(context *core.Context) map[string]interface{} {
+func (ctl *IndexController) Test2Action(context *core.Context) *core.Context {
 	temp := make(map[string]interface{})
 	temp["key1"] = "ddd"
 	spew.Dump(ctl)
-	return temp
+	context.Json(temp)
+	return context
 }

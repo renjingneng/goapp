@@ -5,9 +5,16 @@
 package core
 
 import (
+	"context"
+	"errors"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"reflect"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,7 +50,28 @@ func RegisterController(contlPtr interface{}) {
 
 func Start(addr string) {
 	router.Any("/:pkg/:contl/:method", controllerProcess)
-	router.Run(addr)
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: router,
+	}
+	//step1
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("listen error ", err)
+		}
+	}()
+
+	//step2
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+	log.Println("Server exiting")
 }
 
 func controllerProcess(c *gin.Context) {
@@ -63,5 +91,12 @@ func controllerProcess(c *gin.Context) {
 	}
 	context := &Context{src: c}
 	res := method.Call([]reflect.Value{reflect.ValueOf(context)})
-	c.JSON(http.StatusOK, gin.H{"status": 1, "res": res[0].Interface()})
+	context, _ = res[0].Interface().(*Context)
+	if context.resType == "json" {
+		c.JSON(http.StatusOK, gin.H{"status": 1, "res": context.json})
+	} else if context.resType == "html" {
+		c.HTML(http.StatusOK, context.htmlName, gin.H(context.json))
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": 0})
+	}
 }
