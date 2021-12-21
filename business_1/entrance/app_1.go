@@ -16,6 +16,7 @@ func main() {
 	//读取配置
 	config.LoadConfig()
 	//绑定控制器
+	core.Init()
 	core.RegisterController(&api.IndexController{})
 	core.RegisterController(&admin.IndexController{})
 	//开始

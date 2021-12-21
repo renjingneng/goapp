@@ -16,16 +16,23 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
+
+	"github.com/renjingneng/goapp/core/config"
 )
 
 var contlContainer map[string]interface{}
 var router *gin.Engine
 
-func init() {
+func Init() {
 	contlContainer = make(map[string]interface{})
 	//gin.SetMode(gin.ReleaseMode)
 	router = gin.New()
+	//Session
+	store, _ := redis.NewStore(10, "tcp", config.Get("SessionRedisAddress"), config.Get("SessionRedisPassword"), []byte(config.Get("SessionEncryptionKey")))
+	router.Use(sessions.Sessions(config.Get("SessionName"), store))
 }
 
 func RegisterController(contlPtr interface{}) {
@@ -90,6 +97,7 @@ func controllerProcess(c *gin.Context) {
 		return
 	}
 	context := &Context{src: c}
+	context.session = sessions.Default(context.src)
 	res := method.Call([]reflect.Value{reflect.ValueOf(context)})
 	context, _ = res[0].Interface().(*Context)
 	if context.resType == "json" {

@@ -4,12 +4,15 @@
 package core
 
 import (
-	"github.com/gin-gonic/gin"
 	"path/filepath"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 type Context struct {
 	src      *gin.Context
+	session  sessions.Session
 	resType  string                 //json/html
 	json     map[string]interface{} //can be used as response json or params in html
 	htmlName string
@@ -40,4 +43,24 @@ func (context *Context) Html(path string, val map[string]interface{}) {
 	path = "template/" + path
 	context.htmlName = filepath.Base(path)
 	router.LoadHTMLFiles(path)
+}
+
+func (context *Context) SessionGet(key interface{}) interface{} {
+	return context.session.Get(key)
+}
+func (context *Context) SessionSet(key interface{}, val interface{}) {
+	context.session.Set(key, val)
+}
+func (context *Context) SessionRemove(key interface{}) {
+	context.session.Delete(key)
+}
+func (context *Context) SessionSave() {
+	context.session.Save()
+}
+func (context *Context) DeleteSession() {
+	context.session.Options(sessions.Options{
+		Path:   "/",
+		MaxAge: -1,
+	})
+	context.session.Clear()
 }

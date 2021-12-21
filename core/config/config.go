@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+var viperInstance = viper.New()
+
 // LoadConfig 载入配置文件
 //
 // @Author  renjingneng
@@ -30,10 +32,10 @@ func LoadConfig() {
 	if err != nil {
 		log.Error("config error")
 	}
-	viper.SetConfigName(filename)
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(dir + string(os.PathSeparator) + "config")
-	if err := viper.ReadInConfig(); err != nil {
+	viperInstance.SetConfigName(filename)
+	viperInstance.SetConfigType("yaml")
+	viperInstance.AddConfigPath(dir + string(os.PathSeparator) + "config")
+	if err := viperInstance.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
 			log.Error(err)
@@ -43,7 +45,7 @@ func LoadConfig() {
 		}
 	}
 	//设置环境变量值
-	viper.Set("Env", *envFlag)
+	viperInstance.Set("Env", *envFlag)
 }
 
 // Get 获取配置信息,示例Get("Port")、Get("Hostlist.Open")
@@ -52,7 +54,7 @@ func LoadConfig() {
 //
 // @CreateTime  2020/8/19 11:02
 func Get(key string) string {
-	return viper.GetString(key)
+	return viperInstance.GetString(key)
 }
 
 // GetMap 获取map[string]string
@@ -61,7 +63,7 @@ func Get(key string) string {
 //
 // @CreateTime  2020/8/19 11:06
 func GetMap(key string) map[string]string {
-	return viper.GetStringMapString(key)
+	return viperInstance.GetStringMapString(key)
 }
 
 // GetList 获取[]string
@@ -70,5 +72,5 @@ func GetMap(key string) map[string]string {
 //
 // @CreateTime  2020/8/19 11:06
 func GetList(key string) []string {
-	return viper.GetStringSlice(key)
+	return viperInstance.GetStringSlice(key)
 }
