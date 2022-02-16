@@ -10,6 +10,6 @@ type Open struct {
 
 func NewOpen() *Open {
 	return &Open{
-		RedisBase: database.NewRedisBase("RedisOpen", "Single"),
+		RedisBase: database.NewRedisBase("RedisOpen"),
 	}
 }

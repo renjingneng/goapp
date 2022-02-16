@@ -6,6 +6,8 @@ import (
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
+
+	"github.com/renjingneng/goapp/core/config"
 )
 
 type RedisBase interface {
@@ -25,9 +27,10 @@ type clusterRedisBase struct {
 	Dbptr  *redis.ClusterClient
 }
 
-func NewRedisBase(Dbname string, Mode string) RedisBase {
-	if strings.ToUpper(Mode) == "SINGLE" {
-		dbptr := GetEntityFromRedisContainer(Dbname, "Single")
+func NewRedisBase(Dbname string) RedisBase {
+	redisType := config.Get(Dbname + "Type")
+	dbptr := GetEntityFromRedisContainer(Dbname, redisType)
+	if strings.ToUpper(redisType) == "SINGLE" {
 		db := &singleRedisBase{
 			Dbname: Dbname,
 			Mode:   "Single",
@@ -35,8 +38,7 @@ func NewRedisBase(Dbname string, Mode string) RedisBase {
 		}
 		db.Dbptr, _ = dbptr.(*redis.Client)
 		return db
-	} else if strings.ToUpper(Mode) == "CLUSTER" {
-		dbptr := GetEntityFromRedisContainer(Dbname, "Cluster")
+	} else if strings.ToUpper(redisType) == "CLUSTER" {
 		db := &clusterRedisBase{
 			Dbname: Dbname,
 			Mode:   "Cluster",

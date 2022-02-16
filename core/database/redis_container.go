@@ -17,18 +17,18 @@ func GetEntityFromRedisContainer(database string, mode string) interface{} {
 	if db, ok := redisContainer[dbname]; ok {
 		return db
 	}
-	if ok := config.Get(dbname); ok == "" {
+	if ok := config.Get(database); ok == "" {
 		return nil
 	}
 	var db interface{}
 	if mode == "Single" {
 		db = redis.NewClient(&redis.Options{
-			Addr:     config.Get(dbname),
+			Addr:     config.Get(database),
 			Password: "",
 			DB:       0,
 		})
 	} else if mode == "Cluster" {
-		addrs := strings.Split(config.Get(dbname), ",")
+		addrs := strings.Split(config.Get(database), ",")
 		db = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: addrs,
 		})
